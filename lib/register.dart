@@ -1,98 +1,202 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Register extends StatefulWidget {
-  const Register({super.key});
+  const Register({Key? key});
 
   @override
-  State<Register> createState() => _RegisterState();
+  _RegisterState createState() => _RegisterState();
 }
 
 class _RegisterState extends State<Register> {
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+
+  Future<void> registerUser() async {
+    final url = 'http://192.168.1.13:8080/api/register'; // Replace with your API endpoint
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json', // Set the content type to JSON
+      },
+      body: json.encode({
+        'username': userNameController.text, // Use a predefined username
+        'password': passwordController.text,
+        'firstName': firstNameController.text,
+        'lastName': lastNameController.text,
+        'email': emailController.text,
+        'phone': phoneController.text, // Use a predefined phone number
+      }),
+    );
+
+    // Create a function to show an alert dialog
+    void showAlertDialog(String title, String message) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+     if (response.statusCode == 200) {
+      // User registration successful, handle the response here
+      showAlertDialog("Success", "User registration successful, Kindly Login");
+    }else if(response.statusCode == 401) {
+      // User registration successful, handle the response here
+      showAlertDialog("Failed", "User already registered");
+    }
+     else {
+      // User registration failed, handle the error here
+      print('Registration failed: ${response.reasonPhrase}');
+      showAlertDialog("Error", "User registration failed");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          image: DecorationImage(image: AssetImage("assests/register.png"),fit: BoxFit.cover)
+        image: DecorationImage(
+          image: AssetImage("assests/register.png"), // Correct the path to your image
+          fit: BoxFit.cover,
+        ),
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Stack(
           children: [
             Container(
-              padding: EdgeInsets.only(left: 35,top: 130),
-              child: Text("Register",style: TextStyle(color: Colors.white,fontSize: 33),
+              padding: EdgeInsets.only(left: 35, top: 130),
+              child: Text(
+                "Register",
+                style: TextStyle(color: Colors.white, fontSize: 33),
               ),
             ),
             SingleChildScrollView(
               child: Container(
-                padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.25,
-                    right: 35,
-                    left: 35),
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.25,
+                  right: 35,
+                  left: 35,
+                ),
                 child: Column(
                   children: [
-                    // Text("First Name"),
                     TextField(
+                      controller: userNameController,
                       decoration: InputDecoration(
-                          fillColor: Colors.grey.shade100,
-                          filled: true,
-                          hintText: "First Name",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)
-                          )
+                        fillColor: Colors.grey.shade100,
+                        filled: true,
+                        hintText: "User Name",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+
+                    TextField(
+                      controller: firstNameController,
+                      decoration: InputDecoration(
+                        fillColor: Colors.grey.shade100,
+                        filled: true,
+                        hintText: "First Name",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                     SizedBox(
                       height: 30,
                     ),
                     TextField(
+                      controller: lastNameController,
                       decoration: InputDecoration(
-                          fillColor: Colors.grey.shade100,
-                          filled: true,
-                          hintText: "Last Name",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)
-                          )
+                        fillColor: Colors.grey.shade100,
+                        filled: true,
+                        hintText: "Last Name",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                     SizedBox(
                       height: 30,
                     ),
                     TextField(
+                      controller: emailController,
                       decoration: InputDecoration(
-                          fillColor: Colors.grey.shade100,
-                          filled: true,
-                          hintText: "Email",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)
-                          )
+                        fillColor: Colors.grey.shade100,
+                        filled: true,
+                        hintText: "Email",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                     SizedBox(
                       height: 30,
                     ),
                     TextField(
+                      controller: passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                          fillColor: Colors.grey.shade100,
-                          filled: true,
-                          hintText: "Password",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)
-                          )
+                        fillColor: Colors.grey.shade100,
+                        filled: true,
+                        hintText: "Password",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                     SizedBox(
                       height: 30,
                     ),
                     TextField(
+                      controller: confirmPasswordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                          fillColor: Colors.grey.shade100,
-                          filled: true,
-                          hintText: "Confirm Password",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)
-                          )
+                        fillColor: Colors.grey.shade100,
+                        filled: true,
+                        hintText: "Confirm Password",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    TextField(
+                      controller: phoneController,
+                      decoration: InputDecoration(
+                        fillColor: Colors.grey.shade100,
+                        filled: true,
+                        hintText: "Phone Number",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -104,19 +208,22 @@ class _RegisterState extends State<Register> {
                         Text(
                           "Sign Up",
                           style: TextStyle(
-                              color: Color(0xff4c505b),
-                              fontSize: 27,
-                              fontWeight: FontWeight.w700
+                            color: Color(0xff4c505b),
+                            fontSize: 27,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         CircleAvatar(
-                            radius: 30,
-                            backgroundColor: Color(0xff4c505b),
-                            child: IconButton(
-                                color: Colors.white,
-                                onPressed: (){}
-                                , icon: Icon(Icons.app_registration))
-                        )
+                          radius: 30,
+                          backgroundColor: Color(0xff4c505b),
+                          child: IconButton(
+                            color: Colors.white,
+                            onPressed: () {
+                              registerUser();
+                            },
+                            icon: Icon(Icons.app_registration),
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(
@@ -125,30 +232,25 @@ class _RegisterState extends State<Register> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextButton(onPressed: () {
-                          Navigator.pushNamed(context, "login");
-                        }, child: Text(
-                          "Log In",
-                          style: TextStyle(
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, "login");
+                          },
+                          child: Text(
+                            "Log In",
+                            style: TextStyle(
                               decoration: TextDecoration.underline,
                               fontSize: 18,
-                              color: Color(0xff4c505b)
+                              color: Color(0xff4c505b),
+                            ),
                           ),
-                        )),
-                        // TextButton(onPressed: () {}, child: Text(
-                        //   "Forgot Password",
-                        //   style: TextStyle(
-                        //       decoration: TextDecoration.underline,
-                        //       fontSize: 18,
-                        //       color: Color(0xff4c505b)
-                        //   ),
-                        // ))
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
