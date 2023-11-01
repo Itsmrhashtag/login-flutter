@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:http/http.dart' as http;
 
 class MyLogin extends StatefulWidget {
@@ -13,6 +14,7 @@ class MyLogin extends StatefulWidget {
 class _MyLoginState extends State<MyLogin> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  final _formkey = GlobalKey<FormState>();
 
   Future<void> login() async {
     try {
@@ -20,6 +22,27 @@ class _MyLoginState extends State<MyLogin> {
       var headers = {
         'Authorization': 'Basic aGFzaHRhZzoxMjM0',
       };
+
+
+      void showAlertDialog(String title, String message) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(title),
+              content: Text(message),
+              actions: [
+                TextButton(
+                  child: Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
 
       // Get the username and password entered by the user.
       var username = emailController.text;
@@ -42,8 +65,16 @@ class _MyLoginState extends State<MyLogin> {
       // Handle the result here (e.g., authentication success or failure).
       print(result);
 
+      if (response.statusCode == 200) {
+        // User registration successful, handle the response here
+        Navigator.pushReplacementNamed(context, 'home');
+        showAlertDialog("Success", "User Loging successful");
+      }else if(response.statusCode == 400) {
+        // User registration successful, handle the response here
+        showAlertDialog("Failed", "User Not registered");
+      }
       // If login is successful, navigate to the "home" screen.
-      Navigator.pushReplacementNamed(context, 'home');
+
     } catch (err) {
       // Handle any exceptions that might occur during the request.
       print(err);
@@ -79,96 +110,118 @@ class _MyLoginState extends State<MyLogin> {
                     right: 35,
                     left: 35,
                   ),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          fillColor: Colors.grey.shade100,
-                          filled: true,
-                          hintText: "Email",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      TextField(
-                        controller: passwordController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          fillColor: Colors.grey.shade100,
-                          filled: true,
-                          hintText: "Password",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Sign In",
-                            style: TextStyle(
-                              color: Color(0xff4c505b),
-                              fontSize: 27,
-                              fontWeight: FontWeight.w700,
+
+                  child: Form(
+                    key: _formkey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: emailController,
+                          validator: MultiValidator([
+                            RequiredValidator(
+                                errorText: 'Please enter Username'),
+                          ]),
+                          decoration: InputDecoration(
+                            fillColor: Colors.grey.shade100,
+                            filled: true,
+                            hintText: "Username",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: Color(0xff4c505b),
-                            child: IconButton(
-                              color: Colors.white,
-                              onPressed: () async {
-                                print("pressed");
-                                // Call the login function to make the HTTP request.
-                                await login();
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        TextFormField(
+                          controller: passwordController,
+                          obscureText: true,
+                          validator: MultiValidator([
+                            RequiredValidator(
+                                errorText: 'Please enter Password'),
+                            MinLengthValidator(8,
+                                errorText:
+                                'Password must be atleast 8 digit'),
+                            PatternValidator(r'(?=.*?[#!@$%^&*-])',
+                                errorText:
+                                'Password must be atlist one special character')
+                          ]),
+                          decoration: InputDecoration(
+                            fillColor: Colors.grey.shade100,
+                            filled: true,
+                            hintText: "Password",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Sign In",
+                              style: TextStyle(
+                                color: Color(0xff4c505b),
+                                fontSize: 27,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: Color(0xff4c505b),
+                              child: IconButton(
+                                color: Colors.white,
+                                onPressed: () async {
+                                  print("pressed");
+                                  if (_formkey.currentState!.validate()) {
+                                    print('login form submiitted');
+                                    await login();
+                                  }
+                                  // Call the login function to make the HTTP request.
+
+                                },
+                                icon: Icon(Icons.arrow_forward),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 40,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, "register");
                               },
-                              icon: Icon(Icons.arrow_forward),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 40,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, "register");
-                            },
-                            child: Text(
-                              "Sign Up",
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                fontSize: 18,
-                                color: Color(0xff4c505b),
+                              child: Text(
+                                "Sign Up",
+                                style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  fontSize: 18,
+                                  color: Color(0xff4c505b),
+                                ),
                               ),
                             ),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              "Forgot Password",
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                fontSize: 18,
-                                color: Color(0xff4c505b),
+                            TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                "Forgot Password",
+                                style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  fontSize: 18,
+                                  color: Color(0xff4c505b),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
