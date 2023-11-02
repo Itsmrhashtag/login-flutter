@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:http/http.dart' as http;
+import 'package:login/classes/oauth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyLogin extends StatefulWidget {
   const MyLogin({Key? key});
@@ -12,11 +14,14 @@ class MyLogin extends StatefulWidget {
 }
 
 class _MyLoginState extends State<MyLogin> {
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _formkey = GlobalKey<FormState>();
 
   Future<void> login() async {
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
+    // final SharedPreferences prefs = await _prefs;
     try {
       // Prepare the HTTP request headers, including the Basic Authorization header.
       var headers = {
@@ -61,14 +66,20 @@ class _MyLoginState extends State<MyLogin> {
 
       // Parse the response content as JSON.
       var result = jsonDecode(await response.stream.bytesToString());
+      print(result['access_token']);
+      await _prefs.setString('access_token',result['access_token'] );
+
 
       // Handle the result here (e.g., authentication success or failure).
-      print(result);
+
 
       if (response.statusCode == 200) {
         // User registration successful, handle the response here
+        print(result);
+        // Map<String, dynamic> output= json.decode(response);
         Navigator.pushReplacementNamed(context, 'home');
         showAlertDialog("Success", "User Loging successful");
+
       }else if(response.statusCode == 400) {
         // User registration successful, handle the response here
         showAlertDialog("Failed", "User Not registered");
