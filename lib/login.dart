@@ -68,6 +68,7 @@ class _MyLoginState extends State<MyLogin> {
       var result = jsonDecode(await response.stream.bytesToString());
       print(result['access_token']);
       await _prefs.setString('access_token',result['access_token'] );
+      await _prefs.setString('username',username );
 
 
       // Handle the result here (e.g., authentication success or failure).
